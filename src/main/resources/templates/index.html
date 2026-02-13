@@ -30,6 +30,7 @@
                 0 0 20px rgba(255, 215, 0, 0.3),
                 0 0 60px rgba(120, 0, 80, 0.4);
             backdrop-filter: blur(6px);
+            transition: opacity 1.2s ease;
         }
 
         h1 {
@@ -144,7 +145,7 @@
 
 <div class="hearts"></div>
 
-<div class="container">
+<div class="container" id="card">
     <h1>Himani…</h1>
 
     <p>
@@ -177,23 +178,36 @@
         setTimeout(() => heart.remove(), 10000);
     }, 400);
 
-    // Music start on first click
+    // Music with double tap toggle
     const music = document.getElementById("bgMusic");
     let musicStarted = false;
-    document.addEventListener("click", () => {
+    let lastTap = 0;
+
+    document.addEventListener("click", function (event) {
+
+        if (event.target.closest("#yesBtn")) return;
+
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+
         if (!musicStarted) {
             music.volume = 0.4;
             music.play().catch(()=>{});
             musicStarted = true;
+        } else if (tapLength < 300 && tapLength > 0) {
+            if (music.paused) music.play();
+            else music.pause();
         }
-    }, { once: true });
+
+        lastTap = currentTime;
+    });
 
     // Moving NO button
     const noBtn = document.getElementById("noBtn");
-    const container = document.querySelector(".container");
+    const card = document.getElementById("card");
 
     function moveButton() {
-        const rect = container.getBoundingClientRect();
+        const rect = card.getBoundingClientRect();
         const maxX = rect.width - noBtn.offsetWidth - 20;
         const maxY = rect.height - noBtn.offsetHeight - 20;
         noBtn.style.position = "absolute";
@@ -206,10 +220,10 @@
 
     // YES cinematic transition
     document.getElementById("yesBtn").addEventListener("click", function() {
-        container.style.opacity = "0";
+        card.style.opacity = "0";
 
         setTimeout(() => {
-            container.remove();
+            card.remove();
             document.body.classList.add("cinematic");
 
             const msg = document.createElement("div");
